@@ -1,0 +1,46 @@
+pipeline {
+    agent any
+    environment {
+        SONARQUBE_URL="107.23.14.177:9000"
+        SONAR_TOKEN="sqp_deb2d6cc66d26941a8c4a2e3a2c7c624f4bf1170"
+        DOCKER_USERNAME="saidamo"
+        DOCKER_PASSWORD="sairam2127!"
+    }
+    stages {
+        stage('DOCKER LOGIN') {
+            steps {
+              sh ''' 
+                echo "docker login process"
+              '''
+            }
+        }
+        stage('DOCKER IMAGE BUILD') {
+            steps {
+              sh ''' 
+                docker build -t "${DOCKER_USERNAME}/java:apps" -f docker/Dockerfile docker/
+              '''
+            }
+        }
+        stage('DOCKER IMAGE PUSH') {
+            steps {
+              sh ''' 
+                docker push "${DOCKER_USERNAME}/java:apps"
+              '''
+            }
+        }
+        stage('DOCKER LOGOUT') {
+            steps {
+              sh ''' 
+                echo "docker logout"
+              '''
+            }
+        }
+        stage('ANSIBLE DEPLOYMENT') {
+            steps {
+                sh ''' 
+                    ansible-playbook ansible/main.yml
+                '''
+            }
+        }
+    }
+}
